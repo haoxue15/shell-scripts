@@ -52,7 +52,8 @@ if [ ! -f libsodium-1.0.15.tar.gz ];then
 fi
 
 start_cmd="export LD_LIBRARY_PATH=/usr/local/lib; ssserver -c "$conf_path"config.json -d start"
-eval $start_cmd
+export LD_LIBRARY_PATH=/usr/local/lib
+ssserver -c "$conf_path"config.json -d start
 echo 'shadowsocks started'
 #sleep 3
 
