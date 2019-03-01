@@ -1,10 +1,10 @@
 #!/bin/bash
 
 ####################################
-install_home="/usr/local/shadowsocks/" # 安装目录
-port=443;                        # 端口
-password="12345678"              # 密码
-encrypt="chacha20-ietf-poly1305" # 加密方式
+conf_path="/etc/shadowsocks/" #
+port=443;                        #
+password="12345678"              #
+encrypt="chacha20-ietf-poly1305" #
 ####################################
 
 param_pwd=$1
@@ -12,14 +12,14 @@ if [ -n "$param_pwd" ];then
   password=$param_pwd
 fi
 
-#systemctl stop firewalld
-#systemctl disable firewalld
+systemctl stop firewalld
+systemctl disable firewalld
 
-rm -rf $install_home
-mkdir -p $install_home
+rm -rf $conf_path
+mkdir -p $conf_path
 
 yum update -y
-
+yum install net-tools -y
 yum -y install epel-release
 yum install -y python-pip git gcc gcc-c++ make
 pip install --upgrade pip
@@ -27,9 +27,9 @@ pip install setuptools
 # pip install shadowsocks
 pip install git+https://github.com/shadowsocks/shadowsocks.git@master
 
-cd $install_home
+cd $conf_path
 
-cat > $install_home/config.json <<EOF
+cat > $conf_path/config.json <<EOF
 {
     "server":"0.0.0.0",
     "server_port":$port,
@@ -38,19 +38,20 @@ cat > $install_home/config.json <<EOF
 }
 EOF
 
-wget https://github.com/jedisct1/libsodium/releases/download/1.0.15/libsodium-1.0.15.tar.gz
-tar zxvf libsodium-1.0.15.tar.gz
-cd libsodium-1.0.15
-./configure
-make && make install 
+if [ ! -f libsodium-1.0.15.tar.gz ];then
+	wget https://github.com/jedisct1/libsodium/releases/download/1.0.15/libsodium-1.0.15.tar.gz
+	tar zxvf libsodium-1.0.15.tar.gz
+	cd libsodium-1.0.15
+	./configure
+	make && make install 
+	echo "/usr/local/lib" > /etc/ld.so.conf.d/usr_local_lib.conf
+	ldconfig
+fi
 
-echo "/usr/local/lib" > /etc/ld.so.conf.d/usr_local_lib.conf
-ldconfig
-
-start_cmd="ssserver -c "$install_home"config.json -d start"
+start_cmd="ssserver -c "$conf_path"config.json -d start"
 $start_cmd
 echo 'shadowsocks started'
-sleep 3
+#sleep 3
 
 echo $start_cmd >> /etc/rc.local
 chmod +x /etc/rc.d/rc.local
