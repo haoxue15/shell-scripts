@@ -53,7 +53,7 @@ fi
 
 start_cmd="export LD_LIBRARY_PATH=/usr/local/lib; ssserver -c "$conf_path"config.json -d start"
 export LD_LIBRARY_PATH=/usr/local/lib
-ssserver -c "$conf_path"config.json -d start
+/usr/bin/ssserver -c "$conf_path"config.json -d start
 echo 'shadowsocks started'
 #sleep 3
 
@@ -61,3 +61,4 @@ echo "$start_cmd" >> /etc/rc.local
 chmod +x /etc/rc.d/rc.local
 
 echo "done"
+reboot
