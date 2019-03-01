@@ -7,6 +7,8 @@ password="12345678"              #
 encrypt="chacha20-ietf-poly1305" #
 ####################################
 
+set -x
+
 param_pwd=$1
 if [ -n "$param_pwd" ];then
   password=$param_pwd
@@ -38,6 +40,7 @@ cat > $conf_path/config.json <<EOF
 }
 EOF
 
+cd /root/
 if [ ! -f libsodium-1.0.15.tar.gz ];then
 	wget https://github.com/jedisct1/libsodium/releases/download/1.0.15/libsodium-1.0.15.tar.gz
 	tar zxvf libsodium-1.0.15.tar.gz
@@ -48,12 +51,12 @@ if [ ! -f libsodium-1.0.15.tar.gz ];then
 	ldconfig
 fi
 
-start_cmd="ssserver -c "$conf_path"config.json -d start"
-$start_cmd
+start_cmd="export LD_LIBRARY_PATH=/usr/local/lib; ssserver -c "$conf_path"config.json -d start"
+eval $start_cmd
 echo 'shadowsocks started'
 #sleep 3
 
-echo $start_cmd >> /etc/rc.local
+echo "$start_cmd" >> /etc/rc.local
 chmod +x /etc/rc.d/rc.local
 
 echo "done"
